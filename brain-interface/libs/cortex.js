@@ -145,6 +145,7 @@ class Cortex {
 	};
 
 	async querySessionInfo() {
+		// TODO: Add the functionality to search for headset if no headset was discoverable.
 		let headsetID = '';
 		await this.queryHeadsets().then((headset) => {
 			headsetID = headset;
