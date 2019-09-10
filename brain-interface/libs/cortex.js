@@ -9,6 +9,7 @@ const user = {
 	clientSecret: 'We3hH2eJG7pgPejC9EqRhbDCfWlEUdCp7hfYU9FyhwBJCBPriNSy98j3rn4EHudkBAVO5QjT4IohXQRAPq5jMOLAbGsS6VGiiiVVf3xGcTZdCoPd9xmMzbiJFqcfhdfm',
 };
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 class Cortex {
 	constructor(user) {
 		this.user = user;

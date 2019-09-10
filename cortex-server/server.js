@@ -7,7 +7,7 @@ const app = express();
 const server = http.Server(app);
 const serverIO = require('socket.io')(server);
 
-const database = require('./database');
+const database = require('./models/database');
 
 app.use(express.static(`${__dirname}/public`));
 
