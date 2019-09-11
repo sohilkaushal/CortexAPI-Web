@@ -213,6 +213,6 @@ class Cortex {
 }
 
 const cortexUser =  new Cortex(user);
-cortexUser.subscribeStreams(streams);
+
 
 module.exports = cortexUser;
