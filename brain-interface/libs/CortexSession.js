@@ -6,7 +6,7 @@ function zipToObject(keys, values) {
   for (let i = 0; i < keys.length; i += 1) {
     const keyIdentifier = keys[i];
 
-    if (Arrays.isArray(keyIdentifier)) {
+    if (Array.isArray(keyIdentifier)) {
       Object.assign(result, zipToObject(keyIdentifier, values[i]));
     } else {
       result[keyIdentifier] = values[i];
@@ -52,14 +52,14 @@ class CortexSession extends EventEmitter {
     this.rpc.callMethod('subscribe', {
       cortexToken: this.authToken,
       session: this.id,
-      streams,
+      streams: streams,
     }).then((result) => {
       result.success.forEach((stream) => {
         this.schemas[stream.streamName] = stream.cols;
         this.emit('subscribe', stream);
       });
       result.failure.forEach((stream) => {
-        this.emit('subscribe', stream);
+        this.emit('error', stream);
       });
       if (Object.entries(this.schemas).length > 0) {
         this.webSocket.on('message', this.dataCallback);
@@ -80,7 +80,7 @@ class CortexSession extends EventEmitter {
         this.emit('unsubscribe', stream);
       });
       result.failure.forEach((stream) => {
-        this.emit('unsubscribe', stream);
+        this.emit('error', stream);
       });
       if (Object.entries(this.schemas).length > 0) {
         this.webSocket.removeListener('message', this.dataCallback);

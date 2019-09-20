@@ -64,13 +64,13 @@ class Cortex {
     });
   }
 
-  authorise() {
-    return this.jsonRpc.callMethod('authorize', this.user);
+  async authorise() {
+    this.cortexToken = (await this.jsonRpc.callMethod('authorize', this.user)).cortexToken;
   }
 
   createSession(headsetId) {
     const methodParams = {
-      authToken: this.authToken,
+      cortexToken: this.cortexToken,
       headset: headsetId,
       status: 'open',
     };
@@ -78,7 +78,7 @@ class Cortex {
     return new Promise((resolve, reject) => {
       this.jsonRpc.callMethod('createSession', methodParams)
         .then((result) => {
-          resolve(new CortexSession(result.id, this.jsonRpc, this.authToken, this.socket));
+          resolve(new CortexSession(result.id, this.jsonRpc, this.cortexToken, this.socket));
         }).catch((error) => {
           reject(error);
         });
@@ -87,8 +87,8 @@ class Cortex {
 
   async querySessionInfo() {
     this.headsets = await this.queryHeadsets();
-    this.authToken = await this.authorise();
-    this.session = await this.createSession(this.authToken, this.headset.id);
+    this.cortexToken = await this.authorise();
+    this.session = await this.createSession(this.cortexToken, this.headset.id);
 
     console.log('Headsets ------------------------\n');
     for (let i = 0; i < this.headsets.length; i += 1) {
@@ -96,7 +96,7 @@ class Cortex {
     }
     console.log('\n');
     console.log('Auth Token ------------------------\n');
-    console.log(this.authToken);
+    console.log(this.cortexToken);
     console.log('\n');
     console.log('Session ID ------------------------\n');
     console.log(this.session);
@@ -126,7 +126,6 @@ class Cortex {
       try {
         await this.checkAndQuery();
       } catch (e) {
-        console.log(e);
         return;
       }
       this.session.on('subscribeSuccess', (stream) => {

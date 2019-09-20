@@ -14,13 +14,12 @@ const clientUser = {
   clientSecret: 'We3hH2eJG7pgPejC9EqRhbDCfWlEUdCp7hfYU9FyhwBJCBPriNSy98j3rn4EHudkBAVO5QjT4IohXQRAPq5jMOLAbGsS6VGiiiVVf3xGcTZdCoPd9xmMzbiJFqcfhdfm',
 };
 const cortexApi = new Cortex(clientUser);
-const { device } = args;
 
 function printUsage() {
   console.error(`usage: ${path.basename(process.argv[0])} ${path.basename(process.argv[1])} [options] <action>
   actions:
     device                        Lists all devices available from the Cortex API or a specific device.
-    output <stream> [stream...]   Dumps subscription data to a file or standard out.
+    stream <name> [nameN...]      Dumps subscription data to a file or standard out.
 
   options:
     -d, --device          Specifies which headset to use by ID. Defaults to the first headset available.
@@ -35,7 +34,9 @@ async function waitForQueryHeadsets(id) {
     const getHeadsets = () => {
       cortexApi.queryHeadsets(id)
         .then((headsets) => {
-          resolve(headsets);
+          if (headsets.length > 0) {
+            resolve(headsets);
+          }
         }).catch((error) => {
           reject(error);
         });
@@ -49,18 +50,19 @@ async function streamData() {
   try {
     const argOutFile = args.output;
     const streamNames = args._.slice(1);
-    const { device } = data;
+    const { device } = args;
     let outputFd = process.stdout.fd;
-    if (data['wait-for-device']) {
+    await cortexApi.connect(args.host);
+    await cortexApi.authorise();
+    if (args['wait-for-device']) {
       await waitForQueryHeadsets(device);
     }
 
     if (argOutFile) {
       outputFd = fs.openSync(argOutFile);
     }
-    await cortexApi.connect(args.host);
     const session = await cortexApi.createSession(device);
-    session.subscribe(streamNames);
+    session.subscribe(...streamNames);
     session.on('data', (data) => {
       fs.writeSync(outputFd, `${JSON.stringify(data)}\n`);
     });
@@ -69,6 +71,7 @@ async function streamData() {
     }
   } catch (e) {
     console.error(e);
+    process.exit(2);
   }
 }
 
@@ -97,7 +100,7 @@ switch (mode) {
   case 'stream':
     streamData();
     break;
-  case 'devices':
+  case 'device':
     listDevices();
     break;
   default:
