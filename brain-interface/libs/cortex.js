@@ -5,11 +5,6 @@ const JsonRpc = require('./JsonRpc.js');
 
 const socketURL = 'wss://localhost:6868';
 
-const clientUser = {
-  clientId: 'O5QaJxOBR3hZVIJBHvJC4QUa8lJBuTSAroo9Aa1F',
-  clientSecret: 'We3hH2eJG7pgPejC9EqRhbDCfWlEUdCp7hfYU9FyhwBJCBPriNSy98j3rn4EHudkBAVO5QjT4IohXQRAPq5jMOLAbGsS6VGiiiVVf3xGcTZdCoPd9xmMzbiJFqcfhdfm',
-};
-
 class Cortex {
   constructor(user) {
     this.user = user;
@@ -39,15 +34,17 @@ class Cortex {
         this.jsonRpc = new JsonRpc(this.socket);
         resolve();
       });
-      this.socket.on('error', (socket, err) => {
+      this.socket.on('error', (err) => {
         reject(err);
       });
     });
   }
 
   // TODO: Add timeout parameter.
-  queryHeadsets() {
-    return this.jsonRpc.callMethod('queryHeadsets');
+  queryHeadsets(id) {
+    return this.jsonRpc.callMethod('queryHeadsets', {
+      id: id,
+    });
   }
 
   requestAccess() {
@@ -143,7 +140,6 @@ class Cortex {
   }
 }
 
-const cortexUser = new Cortex(clientUser);
 // cortexUser.subscribeStreams(streams);
 
-module.exports = cortexUser;
+module.exports = Cortex;

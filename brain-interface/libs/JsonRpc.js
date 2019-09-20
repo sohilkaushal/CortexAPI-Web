@@ -29,7 +29,7 @@ class JsonRpc extends EventEmitter {
     this.invokeMethodWithId(methodName, methodParams, this.nextId());
   }
 
-  callMethod(methodName, methodParams, timeoutMs = null) {
+  callMethod(methodName, methodParams, timeoutMs) {
     const currentId = this.nextId();
     const resultPromise = new Promise((resolve, reject) => {
       const callback = (message) => {
@@ -54,7 +54,7 @@ class JsonRpc extends EventEmitter {
         }
       };
 
-      if (timeoutMs !== null) {
+      if (timeoutMs !== undefined) {
         setTimeout(async () => {
           const timeoutError = new Error(`Timeout threshold of ${timeoutMs} ms exceeded when calling ${methodName}`);
           timeoutError.code = 'ERR_RPC_RESPONSE_TIMEOUT';

@@ -113,12 +113,26 @@ class SubscriptionServerMock {
     const maxDelay = this.maxDelay;
     const minDelay = this.minDelay;
     return (ws, request) => {
-      // Delay this so it is after the first result, to ensure response handler safety.
+      const generateSubscriptionData = (type) => {
+        const response = JSON.stringify({
+          "sid": "7d11da0b-0b04-447c-9fa6-6ab91b6cf2d7",
+          "time": Date.now()/1000
+        });
+        response[type] = this.columnMappings[type].data;
+        console.log(`Sent response for subscription ${response}`);
+        ws.send(response);
+        setTimeout(
+          generateSubscriptionData,
+          Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay
+        )
+      };
+      // Delay this so it is after the first few results, to ensure response handler safety.
       replyWithDelay(1000, {
         jsonrpc: "2.0",
         result: {
           failure: [],
           success: request.streams.map((value) => {
+            generateSubscriptionData(value);
             if (!this.cols[value]) {
               return undefined;
             }
@@ -130,21 +144,6 @@ class SubscriptionServerMock {
           }),
         }
       })(ws, request);
-
-      const generateSubscriptionData = function() {
-        const response = JSON.stringify({
-          pow: ,
-          "sid": "7d11da0b-0b04-447c-9fa6-6ab91b6cf2d7",
-          "time": Date.now()/1000
-        });
-        console.log(`Sent response for subscription ${response}`);
-        ws.send(response);
-        setTimeout(
-          generateSubscriptionData,
-          Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay
-        )
-      }
-      generateSubscriptionData();
     }
   }
 }

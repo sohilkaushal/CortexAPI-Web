@@ -1,22 +1,13 @@
 const EventEmitter = require('events');
 
-function zipToObject(keys, values, keyOverrides) {
+function zipToObject(keys, values) {
   const result = {};
 
   for (let i = 0; i < keys.length; i += 1) {
     const keyIdentifier = keys[i];
 
     if (Arrays.isArray(keyIdentifier)) {
-      if (keyOverrides && keyOverrides[i]) {
-        const keyOverride = keyOverrides[i];
-
-        result[keyOverride] = zipToObject(
-          keyIdentifier,
-          values[i],
-          Array.isArray(keyOverride) ? keyOverride[i] : undefined);
-      } else {
-        Object.assign(result, zipToObject(keyIdentifier, values[i]));
-      }
+      Object.assign(result, zipToObject(keyIdentifier, values[i]));
     } else {
       result[keyIdentifier] = values[i];
     }
@@ -65,10 +56,10 @@ class CortexSession extends EventEmitter {
     }).then((result) => {
       result.success.forEach((stream) => {
         this.schemas[stream.streamName] = stream.cols;
-        this.emit('subscribeSuccess', stream);
+        this.emit('subscribe', stream);
       });
       result.failure.forEach((stream) => {
-        this.emit('subscribeFailure', stream);
+        this.emit('subscribe', stream);
       });
       if (Object.entries(this.schemas).length > 0) {
         this.webSocket.on('message', this.dataCallback);
@@ -81,15 +72,15 @@ class CortexSession extends EventEmitter {
   unsubscribe(...streams) {
     this.rpc.callMethod('unsubscribe', {
       cortexToken: this.authToken,
-      session: this.id,
+      session: this.idFailure,
       streams,
     }).then((result) => {
       result.success.forEach((stream) => {
         delete this.schemas[stream.streamName];
-        this.emit('unsubscribeSuccess', stream);
+        this.emit('unsubscribe', stream);
       });
       result.failure.forEach((stream) => {
-        this.emit('unsubscribeFailure', stream);
+        this.emit('unsubscribe', stream);
       });
       if (Object.entries(this.schemas).length > 0) {
         this.webSocket.removeListener('message', this.dataCallback);
