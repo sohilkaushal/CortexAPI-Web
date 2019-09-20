@@ -17,10 +17,8 @@ export default function Deposits() {
   return (
     <React.Fragment>
       <Title>Current State</Title>
-      
       <Typography component="p" variant="h4">
         Concentrating
-        <div className> </div>
       </Typography>
       
     </React.Fragment>

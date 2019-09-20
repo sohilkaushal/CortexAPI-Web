@@ -1,14 +1,26 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-import './components/Dashboard';
-import Dashboard from './components/Dashboard';
+/***
+ *  Created by Sanchit Dang
+ ***/
+import React, { useEffect } from 'react';
+import './styles/App.scss';
+import './database/idb'
+import { CssBaseline } from '@material-ui/core'
+import { AppRoutes } from './routes/routes';
+import { ContextManager } from 'contexts'
+import { Notification, DevModeSwitch } from 'components'
+import { DevModeConfig } from 'configurations'
 
-function App() {
+const App = () => {
+  useEffect(() => {
+    document.title = process.env.REACT_APP_NAME;
+  }, []);
   return (
-    <div>
-      <Dashboard/>
-    </div>
+    <ContextManager>
+      <CssBaseline />
+      <AppRoutes />
+      {DevModeConfig.visible ? <DevModeSwitch /> : ''}
+      <Notification />
+    </ContextManager>
   );
 }
 

@@ -1,0 +1,11 @@
+{
+  "items": [
+    {
+      "name": "Dashboard",
+      "type": "button",
+      "icon": "dashboard",
+      "controller": "home",
+      "customTitle": "Dashboard"
+    }
+  ]
+}
