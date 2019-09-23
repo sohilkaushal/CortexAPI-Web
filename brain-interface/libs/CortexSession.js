@@ -52,7 +52,7 @@ class CortexSession extends EventEmitter {
     this.rpc.callMethod('subscribe', {
       cortexToken: this.authToken,
       session: this.id,
-      streams: streams,
+      streams,
     }).then((result) => {
       result.success.forEach((stream) => {
         this.schemas[stream.streamName] = stream.cols;

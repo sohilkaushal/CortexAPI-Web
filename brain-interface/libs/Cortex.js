@@ -3,7 +3,7 @@ const CortexError = require('./CortexError.js');
 const CortexSession = require('./CortexSession.js');
 const JsonRpc = require('./JsonRpc.js');
 
-const socketURL = 'wss://localhost:6868';
+const DEFAULT_SOCKET_URL = 'wss://localhost:6868';
 
 class Cortex {
   constructor(user) {
@@ -11,11 +11,10 @@ class Cortex {
     this.currentId = 0;
   }
 
-  connect(host) {
-    if (!host) {
-      host = 'localhost';
-    }
-    this.socket = new WebSocket(socketURL, { rejectUnauthorized: false });
+  connect(socketURL = DEFAULT_SOCKET_URL) {
+    this.socket = new WebSocket(socketURL, {
+      rejectUnauthorized: false,
+    });
     return new Promise((resolve, reject) => {
       this.socket.on('open', () => {
         this.jsonRpc = new JsonRpc(this.socket);
@@ -43,7 +42,7 @@ class Cortex {
   // TODO: Add timeout parameter.
   queryHeadsets(id) {
     return this.jsonRpc.callMethod('queryHeadsets', {
-      id: id,
+      id,
     });
   }
 

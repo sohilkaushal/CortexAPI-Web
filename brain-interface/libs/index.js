@@ -6,9 +6,15 @@ const args = require('minimist')(process.argv.slice(2), {
   '--': true,
   string: ['output', 'device'],
   boolean: ['wait-for-device'],
-  alias: { output: 'o', host: 'h', device: 'd', 'wait-for-device': 'w' },
+  alias: {
+    output: 'o',
+    host: 'h',
+    device: 'd',
+    'wait-for-device': 'w',
+  },
 });
 const Cortex = require('./Cortex.js');
+
 const clientUser = {
   clientId: 'O5QaJxOBR3hZVIJBHvJC4QUa8lJBuTSAroo9Aa1F',
   clientSecret: 'We3hH2eJG7pgPejC9EqRhbDCfWlEUdCp7hfYU9FyhwBJCBPriNSy98j3rn4EHudkBAVO5QjT4IohXQRAPq5jMOLAbGsS6VGiiiVVf3xGcTZdCoPd9xmMzbiJFqcfhdfm',
@@ -29,7 +35,7 @@ function printUsage() {
     -w, --wait-for-device Wait for the requested headset to be connected.`);
 }
 
-async function waitForQueryHeadsets(id) {
+function waitForQueryHeadsets(id) {
   return new Promise((resolve, reject) => {
     const getHeadsets = () => {
       cortexApi.queryHeadsets(id)
@@ -41,7 +47,7 @@ async function waitForQueryHeadsets(id) {
           reject(error);
         });
       setTimeout(getHeadsets, 1000);
-    }
+    };
     getHeadsets();
   });
 }
@@ -79,9 +85,9 @@ async function listDevices() {
   try {
     await cortexApi.connect(args.host);
     const { device } = args;
-    const devices = args['wait-for-device'] ?
-      await waitForQueryHeadsets(device) :
-      await cortexApi.queryHeadsets(device);
+    const devices = args['wait-for-device']
+      ? await waitForQueryHeadsets(device)
+      : await cortexApi.queryHeadsets(device);
     console.log(JSON.stringify(devices, null, 2));
   } catch (e) {
     console.error(e);
