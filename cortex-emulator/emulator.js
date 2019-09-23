@@ -114,15 +114,16 @@ class SubscriptionServerMock {
     const minDelay = this.minDelay;
     return (ws, request) => {
       const generateSubscriptionData = (type) => {
-        const response = JSON.stringify({
+        let response = {
           "sid": "7d11da0b-0b04-447c-9fa6-6ab91b6cf2d7",
           "time": Date.now()/1000
-        });
+        };
         response[type] = this.columnMappings[type].data;
+        response = JSON.stringify(response);
         console.log(`Sent response for subscription ${response}`);
         ws.send(response);
         setTimeout(
-          generateSubscriptionData,
+          () => generateSubscriptionData(type),
           Math.floor(Math.random() * (maxDelay - minDelay)) + minDelay
         )
       };
@@ -131,13 +132,15 @@ class SubscriptionServerMock {
         jsonrpc: "2.0",
         result: {
           failure: [],
-          success: request.streams.map((value) => {
-            generateSubscriptionData(value);
-            if (!this.cols[value]) {
-              return undefined;
+          success: request.params.streams.map((value) => {
+            if (!this.columnMappings[value]) {
+              console.error(`No handler for stream ${value}`)
+              // This generates an error in the client.
+              return null;
             }
+            generateSubscriptionData(value);
             return {
-              cols: this.cols[value],
+              cols: this.columnMappings[value].cols,
               sid: "7d11da0b-0b04-447c-9fa6-6ab91b6cf2d7",
               streamName: value,
             }
