@@ -6,9 +6,10 @@ import {
 } from 'recharts';
 
 const data = [
-  { name: 'Group A', value: 100 }, 
+  { name: 'Group A', value: 0.5 }, 
+  { name: 'Group B', value: 0.5 }, 
 ];
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#0088FE', '#ffffff', '#FFBB28', '#FF8042'];
 
 
 export default class Example extends PureComponent {
@@ -25,14 +26,14 @@ export default class Example extends PureComponent {
       <PieChart width={300} height={300} onMouseEnter={this.onPieEnter}>
         <Pie
           data={data}
-          cx={100}
-          cy={115}
+          cx={150}
+          cy={140}
           innerRadius={60}
           outerRadius={100}
           fill="#8884d8"
           paddingAngle={0}
           dataKey="value"
-          label={true}
+          label={false}
         >
           {
             data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
@@ -40,7 +41,7 @@ export default class Example extends PureComponent {
         </Pie>
     
       </PieChart>
-      <p>test</p>
+  
       </React.Fragment>
 
     );

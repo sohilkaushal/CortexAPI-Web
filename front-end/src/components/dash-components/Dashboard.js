@@ -87,6 +87,9 @@ const useStyles = makeStyles(theme => ({
   fixedHeight: {
     //height: 240,
   },
+  paperJustifyRight: {
+    justify: 'flex-end',
+  }
 }));
 
 export default function Dashboard() {
@@ -105,31 +108,38 @@ export default function Dashboard() {
         <Container maxWidth="lg" className={classes.container}>
           <DropDown />
           <Grid container spacing={3}>
-            {/* Chart */}
-            <Grid item xs={12} md={8} lg={6}>
+            <Grid item xs={6} md={8} lg={6}>
               <Paper className={fixedHeightPaper}>
+                <Chart />
+                <Chart />
+                <Chart />
+                <Chart />
                 <Chart />
               </Paper>
             </Grid>
-            {/* Current State */}
-            <Grid item xs={12} md={8} lg={6}>
-              <Paper className={fixedHeightPaper}>
-                {/* <Deposits /> */}
-                <CurrentState />
-              </Paper>
-            </Grid>
-            {/* Pie Chart */}
-            <Grid item xs={12} md={8} lg={6}>
+           
+
+            <Grid item xs={6} md={8} lg={6}>
               <Paper className={fixedHeightPaper}>
                 <PieChart />
+              </Paper>    
+            </Grid>
+
+
+            <Grid item xs={6} md={8} lg={6}>
+              <Paper className={fixedHeightPaper}>
+              <CurrentState />
+
               </Paper>
             </Grid>
-            {/* Intensity*/}
-            <Grid item xs={12} md={8} lg={6}>
+            <Grid item xs={6} md={8} lg={6}>
               <Paper className={fixedHeightPaper}>
+
                 <Intensity />
               </Paper>
             </Grid>
+            
+           
 
           </Grid>
         </Container>
