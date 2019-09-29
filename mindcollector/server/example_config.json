@@ -1,0 +1,13 @@
+{
+  "headsetProviders": {
+    "cortex": {
+      "type": "Cortex",
+      "options": {
+        "host": "localhost",
+        "port": "6868",
+        "clientId": "xyz",
+        "clientSecret": "xyz"
+      }
+    }
+  }
+}

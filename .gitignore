@@ -1,3 +1,6 @@
+mindcollector-backend/config.json
+mindcloud-backend/config.json
+
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
