@@ -14,7 +14,7 @@ export const mainListItems = (
   <div>
     <ListItem button>
       <ListItemIcon>
-        <DashboardIcon />
+        <DashboardIcon/>
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItem>
