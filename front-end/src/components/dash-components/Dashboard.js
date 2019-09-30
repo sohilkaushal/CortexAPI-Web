@@ -1,31 +1,17 @@
-import React from 'react';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core/styles';
-import Select from '@material-ui/core/Select';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Drawer from '@material-ui/core/Drawer';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import IconButton from '@material-ui/core/IconButton';
-import Badge from '@material-ui/core/Badge';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Link from '@material-ui/core/Link';
-import MenuIcon from '@material-ui/icons/Menu';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
+import Paper from '@material-ui/core/Paper';
+import { makeStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import React from 'react';
+import BandpowerRadialBarChart from './BandpowerRadialBarChart';
+import CaptureDropDown from './CaptureDropDown';
 import Chart from './Chart';
-import PieChart from './RadialBar';
-import CurrentState from './CurrentState';
-import Deposits from './Deposits';
+import { nameToColor } from './helpers/colorHelper';
 import Intensity from './Intensity';
-import Orders from './Orders';
-import DropDown from './DropDown';
+import CurrentState from './MentalState';
+import Title from './Title';
 
 
 function Copyright() {
@@ -36,8 +22,6 @@ function Copyright() {
         MindPad
       </Link>{' '}
       {new Date().getFullYear()}
-
-
     </Typography>
   );
 }
@@ -46,7 +30,7 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
   root: {
-    display: 'flex',
+    flexGrow: 1,
   },
   toolbarIcon: {
     display: 'flex',
@@ -84,66 +68,157 @@ const useStyles = makeStyles(theme => ({
     overflow: 'auto',
     flexDirection: 'column',
   },
-  fixedHeight: {
-    //height: 240,
-  },
   paperJustifyRight: {
     justify: 'flex-end',
   }
 }));
 
+const convertCaptureData = (incomingData) => {
+  const convertedData = {};
+
+  // TODO: The slash breaking part of this should live within the mindcollector-backend (i.e. prior to storage).
+  //       Cortex's response format is not ideal.
+  incomingData.forEach((entry) => {
+    const { time } = entry;
+    const dataByChannel = {};
+
+    Object.entries(entry.data).forEach(([key, value]) => {
+      const [, channel, bandName] = key.match(/^([^/]*)\/(.*)$/);
+      const channelData = dataByChannel[channel] = (dataByChannel[channel] || {});
+
+      channelData.time = time;
+      channelData[bandName] = value;
+    });
+
+    Object.entries(dataByChannel).forEach(([key, value]) => {
+      const channelData = convertedData[key] = (convertedData[key] || []);
+
+      channelData.push(value);
+    });
+  });
+
+  return convertedData;
+}
+
+const calculateBandMeans = (incomingData) => {
+  const bandMeansResult = {};
+  const bandCountsResult = {};
+  incomingData.forEach((entry) => {
+    Object.entries(entry.data).forEach(([key, value]) => {
+      const bandName = key.match(/^[^/]*\/(.*)$/)[1];
+
+      bandMeansResult[bandName] = (bandMeansResult[bandName] || 0) + value;
+      bandCountsResult[bandName] = (bandCountsResult[bandName] || 0) + 1;
+    });
+  });
+
+  return Object.entries(bandMeansResult).map(([key, value]) => {
+    return {
+      name: key,
+      bandpower: value / bandCountsResult[key],
+      fill: nameToColor(key),
+    };
+  }).sort((value1, value2) => {
+    const bandpower1 = value1.bandpower;
+    const bandpower2 = value2.bandpower;
+
+    if (bandpower1 > bandpower2) {
+      return 1;
+    }
+    if (bandpower2 > bandpower1) {
+      return -1;
+    }
+    return 0;
+  });
+}
+
+const getMaxVersusOthers = (bandData) => {
+  const maxValue = bandData[bandData.length - 1];
+  let otherValue = {
+    name: 'Others',
+    bandpower: 0
+  };
+  for (var i = 0; i < bandData.length - 1; i += 1) {
+    otherValue.bandpower += bandData[i].bandpower;
+  }
+  return [maxValue, otherValue];
+}
+
 export default function Dashboard() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  // Exposed to child components.
+  const [bandMeans, setBandMeans] = React.useState([]);
+  const [captureData, setCaptureData] = React.useState({});
+  const [intensityData, setIntensityData] = React.useState([]);
+  const [highestBand, setHighestBand] = React.useState('');
+  // const DashboardContext = React.createContext();
 
-  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const setDataCallback = (response) => {
+    if (!response){
+      setCaptureData({});
+      setBandMeans([]);
+      setIntensityData([]);
+      setHighestBand('');
+      return;
+    }
+    const { data } = response.data;
+
+    try {
+      const bandMeans =calculateBandMeans(data)
+      setCaptureData(convertCaptureData(data));
+      setBandMeans(bandMeans);
+      setIntensityData(getMaxVersusOthers(bandMeans));
+      setHighestBand(bandMeans[bandMeans.length - 1].name);
+    } catch (ex) {
+      console.error('Failure to convert capture data');
+      console.error(ex);
+    }
+  };
 
   return (
     <div className={classes.root}>
-      {/* <CssBaseline /> */}
-
       <main className={classes.content}>
+        {/* <DashboardContext.Provider value={{
+          
+        }}> */}
         <div className={classes.appBarSpacer} />
 
         <Container maxWidth="lg" className={classes.container}>
-          <DropDown />
+          <CaptureDropDown setDataCallback={setDataCallback} />
           <Grid container spacing={3}>
-            <Grid item xs={6} md={8} lg={6}>
-              <Paper className={fixedHeightPaper}>
-                <Chart />
-                <Chart />
-                <Chart />
-                <Chart />
-                <Chart />
+            <Grid item xs={12}>
+              <CurrentState highestBand={highestBand} />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Paper className={classes.paper}>
+                <Title>Brainwave channels</Title>
+                {
+                  Object.entries(captureData).map(([key, value]) => (
+                    <Chart key={key} chartData={value} title={key} />
+                  ))
+                }
               </Paper>
             </Grid>
-           
 
-            <Grid item xs={6} md={8} lg={6}>
-              <Paper className={fixedHeightPaper}>
-                <PieChart />
-              </Paper>    
+            <Grid container item xs={12} md={6} spacing={3} direction="column" >
+              <Grid item xs={12}>
+                <Paper className={classes.paper}>
+                  <Title>Mean bandpower (all channels)</Title>
+                  <BandpowerRadialBarChart chartData={bandMeans} />
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Paper className={classes.paper}>
+                  <Title>Intensity</Title>
+                  <Intensity chartData={intensityData} />
+                </Paper>
+              </Grid>
             </Grid>
-
-
-            <Grid item xs={6} md={8} lg={6}>
-              <Paper className={fixedHeightPaper}>
-              <CurrentState />
-
-              </Paper>
-            </Grid>
-            <Grid item xs={6} md={8} lg={6}>
-              <Paper className={fixedHeightPaper}>
-
-                <Intensity />
-              </Paper>
-            </Grid>
-            
-           
-
           </Grid>
         </Container>
-
+        {/* </DashboardContext.Provider> */}
         <Copyright />
       </main>
     </div>

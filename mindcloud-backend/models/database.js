@@ -13,6 +13,8 @@ const db = mongoose.connection;
 // eslint-disable-next-line no-console
 db.on('error', console.error.bind('MongoDB Connection Error'));
 
+// This may need to change if we hit the 16MB document limit.
+// However, it simplifies the code for now.
 const CaptureModelSchema = new Schema({
   name: {
     type: Schema.Types.String,
@@ -23,7 +25,7 @@ const CaptureModelSchema = new Schema({
     type: Schema.Types.Mixed,
   },
   data: {
-    type: Schema.Types.Array,
+    type: Schema.Types.Mixed,
     required: true,
   },
 });

@@ -56,7 +56,7 @@ router.route('/:captureName')
     const { data, metadata } = req.body;
     const model = new CaptureModel({
       name: captureName,
-      data,
+      data: data,
       metadata,
     });
 

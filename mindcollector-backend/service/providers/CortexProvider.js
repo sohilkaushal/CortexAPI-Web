@@ -221,6 +221,7 @@ class CortexProvider {
   uploadCapture = async (captureId, uploadName) => {
     const captureInProgress = this.inProgressCaptures[captureId];
     let capture;
+
     if (captureInProgress) {
       capture = captureInProgress.capture;
     } else {

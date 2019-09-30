@@ -55,58 +55,69 @@
 // }
 
 import React, { PureComponent } from 'react';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
+import { Legend, Line, LineChart, Tooltip, XAxis } from 'recharts';
+import { nameToColor } from './helpers/colorHelper';
 
-const data = [
-  {
-    name: 'Page A', uv: 4000, pv: 2400, amt: 2400, a: 2460, b: 2100,
-  },
-  {
-    name: 'Page B', uv: 3000, pv: 1398, amt: 2210, a: 2460, b: 2100,
-  },
-  {
-    name: 'Page C', uv: 2000, pv: 9800, amt: 2290,a: 2460, b: 2100,
-  },
-  {
-    name: 'Page D', uv: 2780, pv: 3908, amt: 2000,a: 2460, b: 2100,
-  },
-  {
-    name: 'Page E', uv: 1890, pv: 4800, amt: 2181,a: 2460, b: 2100,
-  },
-  {
-    name: 'Page F', uv: 2390, pv: 3800, amt: 2500,a: 2460, b: 2100,
-  },
-  {
-    name: 'Page G', uv: 3490, pv: 4300, amt: 2100,a: 2460, b: 2100,
-  },
-];
+export default class ChannelCaptureChart extends PureComponent {
+  constructor(params) {
+    super(params);
+    this.state = {
+      chartData: [],
+      title: '',
+      dataKeys: [],
+    };
+  }
 
-export default class Example extends PureComponent {
-  static jsfiddleUrl = 'https://jsfiddle.net/alidingling/xqjtetw0/';
+  componentDidMount = () => {
+    const { title, chartData } = this.props;
+    this.setState({
+      title,
+      chartData,
+      dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : []
+    });
+  }
+
+  componentDidUpdate = (prevProps, prevState, snapshot) => {
+    const { title, chartData } = this.props;
+    if (title === prevProps.title
+      && chartData === prevProps.chartData) {
+      return;
+    }
+    const state = {
+      ...prevState,
+      title,
+      chartData,
+      dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : [],
+    };
+
+    this.setState(state);
+  }
 
   render() {
     return (
-      <LineChart
-        width={570}
-        height={130}
-        data={data}
-        margin={{
-          top: 5, right: 30, left: 20, bottom: 5,
-        }}
-      >
-        {/* <CartesianGrid strokeDasharray="3 3" /> */}
-        {/* <XAxis dataKey="name" /> */}
-        {/* <YAxis /> */}
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-        <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-        <Line type="monotone" dataKey="amt" stroke="#82ca9d" />
-        <Line type="monotone" dataKey="a" stroke="#82ca9d" />
-        <Line type="monotone" dataKey="b" stroke="#82fs4d" />
-      </LineChart>
+      <div>
+        <div><b>{this.state.title}</b></div>
+        <LineChart
+          width={530}
+          height={200}
+          data={this.state.chartData}
+          margin={{
+            top: 5, right: 5, left: 5, bottom: 5,
+          }}
+        >
+          <Tooltip labelFormatter={(value) => new Date(value * 1000).toLocaleString()} />
+          <Legend />
+          <XAxis
+            dataKey="time"
+            domain={["dataMin", "dataMax"]}
+            type="number"
+            scale="utc"
+            tickFormatter={(value) => new Date(value * 1000).toLocaleTimeString()} />
+          {
+            this.state.dataKeys.map((key) => <Line key={key} type="monotone" dataKey={key} stroke={nameToColor(key)} />)
+          }
+        </LineChart>
+      </div>
     );
   }
 }

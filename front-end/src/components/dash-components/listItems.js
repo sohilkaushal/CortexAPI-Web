@@ -25,7 +25,6 @@ export const mainListItems = (
       </ListItemIcon>
       <ListItemText primary="Profiles" />
     </ListItem>
-    
   </div>
 );
 
