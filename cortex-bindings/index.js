@@ -12,12 +12,6 @@ const ServerRpcError = require('./lib/ServerRpcError');
 const SessionStatus = require('./lib/SessionStatus');
 const ConnectionStatus = require('./lib/ConnectionStatus');
 
-const clientUser = {
-  clientId: 'O5QaJxOBR3hZVIJBHvJC4QUa8lJBuTSAroo9Aa1F',
-  clientSecret: 'We3hH2eJG7pgPejC9EqRhbDCfWlEUdCp7hfYU9FyhwBJCBPriNSy98j3rn4EHudkBAVO5QjT4IohXQRAPq5jMOLAbGsS6VGiiiVVf3xGcTZdCoPd9xmMzbiJFqcfhdfm',
-};
-const cortexApi = new Cortex(clientUser);
-
 function printUsage() {
   console.error(`usage: ${path.basename(process.argv[0])} ${path.basename(process.argv[1])} [options] <action>
   actions:
@@ -29,8 +23,10 @@ function printUsage() {
   options:
     -d, --device          Specifies which headset to use by ID. Defaults to the first headset available.
     -h, --host            Specifies the host which exposes the Cortex API. Defaults to 'localhost'.
+    -i, --client-id       Specifies client ID to use when connecting to the API.
     -o, --output          Specifies a file where subscription data should be written. Defaults to stdout.
     -p, --port            Specifies the port which exposes the Cortex API. Defaults to 6868.
+    -s, --client-secret   Specifies client secret to use when connecting to the API.
     -w, --wait-for-device Wait for the requested headset to be connected.`);
 }
 
@@ -52,7 +48,7 @@ function waitForQueryHeadsets(id) {
   });
 }
 
-async function streamData(args) {
+async function streamData(cortexApi, args) {
   try {
     const argOutFile = args.output;
     const streamNames = args._.slice(1);
@@ -84,7 +80,7 @@ async function streamData(args) {
   }
 }
 
-async function listDevices(args) {
+async function listDevices(cortexApi, args) {
   try {
     await cortexApi.connect(args.host);
     const { device } = args;
@@ -98,7 +94,7 @@ async function listDevices(args) {
   process.exit(0);
 }
 
-async function requestAccess(args) {
+async function requestAccess(cortexApi, args) {
   try {
     await cortexApi.connect(args.host);
     console.log(await cortexApi.requestAccess());
@@ -112,7 +108,7 @@ async function requestAccess(args) {
 function main() {
   const args = minimist(process.argv.slice(2), {
     '--': true,
-    string: ['output', 'device', 'host', 'port'],
+    string: ['output', 'device', 'host', 'port', 'client-id', 'client-secret'],
     boolean: ['wait-for-device'],
     default: {
       host: 'localhost',
@@ -123,9 +119,18 @@ function main() {
       host: 'h',
       port: 'p',
       device: 'd',
+      'client-id': 'i',
+      'client-secret': 's',
       'wait-for-device': 'w',
     },
   });
+  const clientParameters = {
+    clientId: args['client-id'],
+    clientSecret: args['client-secret'],
+    host: args.host,
+    port: args.port,
+  };
+  const cortexApi = new Cortex(clientParameters);
 
   if (args._.length < 1) {
     printUsage();
@@ -136,13 +141,13 @@ function main() {
 
   switch (mode) {
     case 'stream':
-      streamData(args);
+      streamData(cortexApi, args);
       break;
     case 'device':
-      listDevices(args);
+      listDevices(cortexApi, args);
       break;
     case 'request-access':
-      requestAccess(args);
+      requestAccess(cortexApi, args);
       break;
     default:
       printUsage();

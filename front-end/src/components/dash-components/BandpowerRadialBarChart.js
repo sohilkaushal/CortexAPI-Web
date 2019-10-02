@@ -35,11 +35,7 @@ export default class BandpowerRadialBarChart extends PureComponent {
     return (
       <React.Fragment>
         <RadialBarChart width={500} height={300} cx={150} cy={150} innerRadius="25%" outerRadius="100%" barSize={32} data={this.state.chartData} startAngle={180} endAngle={-180}>
-          <RadialBar label={{
-            position: 'insideStart',
-            fill: '#fff',
-            formatter: (value) => Math.floor(value * 1000) / 1000
-          }} background dataKey="bandpower" />
+          <RadialBar background dataKey="bandpower" />
           <Legend iconSize={10} width={120} height={140} layout="vertical" verticalAlign="middle" wrapperStyle={style} />
         </RadialBarChart>
       </React.Fragment>

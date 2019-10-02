@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "nodemon --inspect ./bin/www"
+    "devstart": "nodemon --inspect=9230 ./bin/www"
   },
   "dependencies": {
     "acorn": "^7.1.0",

@@ -37,14 +37,14 @@ class HeadsetCaptureRepository {
    * @param {string} id A unique identifier which represents the session
    */
   getCapture = (id) => {
-    const resolvedDir = path.join(
+    const resolvedDir = path.resolve(path.join(
       this.directory,
       id,
-    );
+    ));
 
     // Directory traversal detection.
     if (resolvedDir.startsWith('../')
-      || !resolvedDir.startsWith(this.directory)) {
+      || !resolvedDir.startsWith(path.resolve(this.directory))) {
       throw new Error('Invalid capture ID provided');
     }
     return new HeadsetCapture(resolvedDir);

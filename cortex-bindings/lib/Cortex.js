@@ -33,9 +33,13 @@ class Cortex {
     return new Promise((resolve, reject) => {
       this.socket = new WebSocket(socketUrl, {
         rejectUnauthorized: false,
+        encoding: 'utf8'
       });
       this.socket.on('open', () => {
-        this.socketStream = WebSocket.createWebSocketStream(this.socket);
+        this.socketStream = WebSocket.createWebSocketStream(this.socket, {
+          encoding: 'utf8',
+          decodeStrings: false,
+        });
         this.jsonRpc = new JsonRpc(this.socketStream);
         resolve();
       });

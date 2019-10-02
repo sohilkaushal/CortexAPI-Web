@@ -8,11 +8,17 @@ import React from 'react';
 import BandpowerRadialBarChart from './BandpowerRadialBarChart';
 import CaptureDropDown from './CaptureDropDown';
 import Chart from './Chart';
-import { nameToColor } from './helpers/colorHelper';
 import Intensity from './Intensity';
 import CurrentState from './MentalState';
 import Title from './Title';
 
+const GrayColor = '#CCCCCC';
+const ChartColors = ['#77D7F2',
+    '#70CCE6',
+    '#64B5CC',
+    '#5193A6',
+    '#325B66',
+];
 
 function Copyright() {
   return (
@@ -51,12 +57,13 @@ const useStyles = makeStyles(theme => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-
   appBarSpacer: theme.mixins.toolbar,
   content: {
     flexGrow: 1,
     height: '100vh',
-    overflow: 'auto',
+  },
+  noGrow: {
+    flexGrow: 0,
   },
   container: {
     paddingTop: theme.spacing(0),
@@ -112,11 +119,11 @@ const calculateBandMeans = (incomingData) => {
     });
   });
 
-  return Object.entries(bandMeansResult).map(([key, value]) => {
+  return Object.entries(bandMeansResult).map(([key, value], index) => {
     return {
       name: key,
       bandpower: value / bandCountsResult[key],
-      fill: nameToColor(key),
+      fill: ChartColors[index % ChartColors.length],
     };
   }).sort((value1, value2) => {
     const bandpower1 = value1.bandpower;
@@ -136,7 +143,8 @@ const getMaxVersusOthers = (bandData) => {
   const maxValue = bandData[bandData.length - 1];
   let otherValue = {
     name: 'Others',
-    bandpower: 0
+    bandpower: 0,
+    fill: GrayColor,
   };
   for (var i = 0; i < bandData.length - 1; i += 1) {
     otherValue.bandpower += bandData[i].bandpower;
@@ -151,7 +159,6 @@ export default function Dashboard() {
   const [captureData, setCaptureData] = React.useState({});
   const [intensityData, setIntensityData] = React.useState([]);
   const [highestBand, setHighestBand] = React.useState('');
-  // const DashboardContext = React.createContext();
 
   const setDataCallback = (response) => {
     if (!response){
@@ -178,9 +185,6 @@ export default function Dashboard() {
   return (
     <div className={classes.root}>
       <main className={classes.content}>
-        {/* <DashboardContext.Provider value={{
-          
-        }}> */}
         <div className={classes.appBarSpacer} />
 
         <Container maxWidth="lg" className={classes.container}>
@@ -190,26 +194,26 @@ export default function Dashboard() {
               <CurrentState highestBand={highestBand} />
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md>
               <Paper className={classes.paper}>
                 <Title>Brainwave channels</Title>
                 {
                   Object.entries(captureData).map(([key, value]) => (
-                    <Chart key={key} chartData={value} title={key} />
+                    <Chart key={key} chartData={value} title={key} chartColors={ChartColors} />
                   ))
                 }
               </Paper>
             </Grid>
 
-            <Grid container item xs={12} md={6} spacing={3} direction="column" >
-              <Grid item xs={12}>
+            <Grid container item xs={12} md spacing={3} direction="column" justify="flex-start" >
+              <Grid item xs className={classes.noGrow}>
                 <Paper className={classes.paper}>
                   <Title>Mean bandpower (all channels)</Title>
                   <BandpowerRadialBarChart chartData={bandMeans} />
                 </Paper>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid item xs className={classes.noGrow}>
                 <Paper className={classes.paper}>
                   <Title>Intensity</Title>
                   <Intensity chartData={intensityData} />
@@ -218,7 +222,6 @@ export default function Dashboard() {
             </Grid>
           </Grid>
         </Container>
-        {/* </DashboardContext.Provider> */}
         <Copyright />
       </main>
     </div>

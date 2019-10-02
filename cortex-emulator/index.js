@@ -179,6 +179,6 @@ wsServer.on('connection', (ws, req) => {
   })
 })
 
-server.listen(6868)
+server.listen(6869)
 console.log('Started Cortex API emulator.')
 

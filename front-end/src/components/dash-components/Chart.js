@@ -56,7 +56,6 @@
 
 import React, { PureComponent } from 'react';
 import { Legend, Line, LineChart, Tooltip, XAxis } from 'recharts';
-import { nameToColor } from './helpers/colorHelper';
 
 export default class ChannelCaptureChart extends PureComponent {
   constructor(params) {
@@ -65,20 +64,22 @@ export default class ChannelCaptureChart extends PureComponent {
       chartData: [],
       title: '',
       dataKeys: [],
+      chartColors: ['black'],
     };
   }
 
   componentDidMount = () => {
-    const { title, chartData } = this.props;
+    const { title, chartData, chartColors } = this.props;
     this.setState({
       title,
       chartData,
-      dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : []
+      dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : [],
+      chartColors,
     });
   }
 
   componentDidUpdate = (prevProps, prevState, snapshot) => {
-    const { title, chartData } = this.props;
+    const { title, chartData, chartColors } = this.props;
     if (title === prevProps.title
       && chartData === prevProps.chartData) {
       return;
@@ -88,6 +89,7 @@ export default class ChannelCaptureChart extends PureComponent {
       title,
       chartData,
       dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : [],
+      chartColors,
     };
 
     this.setState(state);
@@ -103,8 +105,7 @@ export default class ChannelCaptureChart extends PureComponent {
           data={this.state.chartData}
           margin={{
             top: 5, right: 5, left: 5, bottom: 5,
-          }}
-        >
+          }}>
           <Tooltip labelFormatter={(value) => new Date(value * 1000).toLocaleString()} />
           <Legend />
           <XAxis
@@ -114,7 +115,7 @@ export default class ChannelCaptureChart extends PureComponent {
             scale="utc"
             tickFormatter={(value) => new Date(value * 1000).toLocaleTimeString()} />
           {
-            this.state.dataKeys.map((key) => <Line key={key} type="monotone" dataKey={key} stroke={nameToColor(key)} />)
+            this.state.dataKeys.map((key, index) => <Line key={key} type="monotone" dataKey={key} strokeWidth={2} stroke={this.state.chartColors[index % this.state.chartColors.length]} />)
           }
         </LineChart>
       </div>
