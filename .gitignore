@@ -1,4 +1,4 @@
-mindcollector-data/
+mindcollector-data
 mindcollector-backend/config.json
 mindcloud-backend/config.json
 
@@ -92,7 +92,8 @@ typings/
 
 # gatsby files
 .cache/
-public
+# Keep public.
+#public
 
 # vuepress build output
 .vuepress/dist
