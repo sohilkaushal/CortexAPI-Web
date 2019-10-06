@@ -27,6 +27,20 @@ class API {
       errorHelper(error)
     })
   }
+
+  getCaptureIds = (callback) => {
+    axiosInstance.get('capture')
+      .then(callback).catch((error) => { errorHelper(error)});
+  }
+
+  getCapture = (captureId, includeData, callback) => {
+    axiosInstance.get(`capture/${encodeURIComponent(captureId)}`, {
+      params: {
+        includeData,
+      }
+    }).then(callback).catch((error) => { errorHelper(error)});
+  }
 }
+
 const instance = new API();
 export default instance;

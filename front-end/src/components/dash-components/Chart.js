@@ -1,64 +1,68 @@
 import React, { PureComponent } from 'react';
-import Typography from '@material-ui/core/Typography';
-import Title from './Title';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
+import { Legend, Line, LineChart, Tooltip, XAxis } from 'recharts';
 
-const series = [
-  {
-    name: 'Series 1',
-    data: [
-      { category: 'A', value: Math.random() },
-      { category: 'B', value: Math.random() },
-      { category: 'C', value: Math.random() },
-    ],
-  },
-  {
-    name: 'Series 2',
-    data: [
-      { category: 'B', value: Math.random() },
-      { category: 'C', value: Math.random() },
-      { category: 'D', value: Math.random() },
-    ],
-  },
-  {
-    name: 'Series 3',
-    data: [
-      { category: 'C', value: Math.random() },
-      { category: 'D', value: Math.random() },
-      { category: 'E', value: Math.random() },
-    ],
-  },
-];
+export default class ChannelCaptureChart extends PureComponent {
+  constructor(params) {
+    super(params);
+    this.state = {
+      chartData: [],
+      title: '',
+      dataKeys: [],
+      chartColors: ['black'],
+    };
+  }
 
-export default class Example extends PureComponent {
-  static jsfiddleUrl = 'https://jsfiddle.net/alidingling/ewcqxbwo/';
+  componentDidMount = () => {
+    const { title, chartData, chartColors } = this.props;
+    this.setState({
+      title,
+      chartData,
+      dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : [],
+      chartColors,
+    });
+  }
 
-  
+  componentDidUpdate = (prevProps, prevState, snapshot) => {
+    const { title, chartData, chartColors } = this.props;
+    if (title === prevProps.title
+      && chartData === prevProps.chartData) {
+      return;
+    }
+    const state = {
+      ...prevState,
+      title,
+      chartData,
+      dataKeys: chartData.length > 0 ? Object.keys(chartData[0]).filter((key) => key !== 'time') : [],
+      chartColors,
+    };
+
+    this.setState(state);
+  }
+
   render() {
     return (
-      
-      <React.Fragment>
-      <Title>Raw EEG Data</Title>
-      
-      <Typography component="p" variant="h4">
-        <div className> </div>
-      </Typography>
-      
-      <LineChart width={500} height={300}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="category" type="category" allowDuplicatedCategory={false} />
-        <YAxis dataKey="value" />
-        <Tooltip />
-        <Legend />
-        {series.map(s => (
-          <Line dataKey="value" data={s.data} name={s.name} key={s.name} />
-        ))}
-      </LineChart>
-    </React.Fragment>
-
+      <div>
+        <div><b>{this.state.title}</b></div>
+        <LineChart
+          width={530}
+          height={200}
+          data={this.state.chartData}
+          margin={{
+            top: 5, right: 5, left: 5, bottom: 5,
+          }}>
+          <Tooltip labelFormatter={(value) => new Date(value * 1000).toLocaleString()} />
+          <Legend />
+          <XAxis
+            dataKey="time"
+            domain={["dataMin", "dataMax"]}
+            type="number"
+            scale="utc"
+            tickFormatter={(value) => new Date(value * 1000).toLocaleTimeString()} />
+          {
+            this.state.dataKeys.map((key, index) => <Line key={key} type="monotone" dataKey={key} strokeWidth={2} stroke={this.state.chartColors[index % this.state.chartColors.length]} />)
+          }
+        </LineChart>
+      </div>
     );
   }
 }
-

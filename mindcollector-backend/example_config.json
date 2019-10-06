@@ -1,0 +1,15 @@
+{
+  "headsetProviders": {
+    "cortex": {
+      "type": "Cortex",
+      "options": {
+        "host": "localhost",
+        "port": "6868",
+        "clientId": "xyz",
+        "clientSecret": "xyz"
+      }
+    }
+  },
+  "dataDirectory": "../mindcollector-data",
+  "mindCloudUrl": "http://localhost:7689/api/"
+}

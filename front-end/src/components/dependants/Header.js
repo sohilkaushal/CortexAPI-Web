@@ -79,6 +79,10 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     margin: theme.spacing(1),
+  },
+  toolbarLogo: {
+    marginRight: 16,
+    height: 36,
   }
 }))
 
@@ -111,8 +115,9 @@ export const Header = () => {
           >
             <MenuIcon />
           </IconButton>
+          <img src='/images/logo.png' className={classes.toolbarLogo} />
           <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
-            {pageTitle}
+            MindPad
           </Typography>
           <IconButton color="inherit" onClick={() => logout()}>
             <ExitToApp />
